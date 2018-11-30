@@ -1,0 +1,17 @@
+# -*- mode: gitignore; -*-
+
+# gitignore https://github.com/github/gitignore
+
+# * misc
+nogit_*
+*_nogit
+
+# * Editors
+# ** Emacs 
+*~
+\#*\#
+.\#*
+
+# ** Vi
+*.swp
+
