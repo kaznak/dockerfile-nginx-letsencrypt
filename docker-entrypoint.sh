@@ -66,8 +66,14 @@ EOF
 
     chmod +x /etc/periodic/weekly/acme-client
 
+    MSG="line:$LINENO INFO while starting nginx"
+    nginx
+
     MSG="line:$LINENO INFO while Generating initial certficate"
     /etc/periodic/weekly/acme-client
+
+    MSG="line:$LINENO INFO while stopping nginx"
+    nginx -s stop
 }
 
 ################################################################
