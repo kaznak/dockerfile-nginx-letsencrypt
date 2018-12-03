@@ -48,6 +48,15 @@ ERROR_HANDLER()	{
 }
 
 ########################################################################
+MSG="line:$LINENO INFO while backup nginx configuration files."
+{
+    for host in $HOSTS ; do
+	[ ! -s /etc/nginx/conf.d/$host.conf ]	||
+	    mv /etc/nginx/conf.d/$host.conf /etc/nginx/conf.d/$host.conf.back
+    done
+}
+
+########################################################################
 MSG="line:$LINENO INFO while Generating acme-client periodic script"
 {
     cat	<<EOF	> /etc/periodic/weekly/acme-client
@@ -74,6 +83,14 @@ EOF
 
     MSG="line:$LINENO INFO while stopping nginx"
     nginx -s stop
+}
+
+########################################################################
+MSG="line:$LINENO INFO while restore nginx configuration files."
+{
+    for host in $HOSTS ; do
+	mv /etc/nginx/conf.d/$host.conf.back /etc/nginx/conf.d/$host.conf
+    done
 }
 
 ################################################################
