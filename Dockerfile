@@ -8,7 +8,8 @@ RUN apk add acme-client
 COPY default_server.conf /etc/nginx/conf.d/default_server.conf
 COPY docker-entrypoint.sh /usr/local/bin/
 
-VOLUME /etc/nginx/conf.d/
+VOLUME /etc/nginx
+VOLUME /etc/ssl/acme
 EXPOSE 80 443
 STOPSIGNAL SIGTERM
 
