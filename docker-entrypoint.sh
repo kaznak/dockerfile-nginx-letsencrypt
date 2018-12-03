@@ -48,18 +48,19 @@ ERROR_HANDLER()	{
 }
 
 ########################################################################
-MSG="line:$LINENO INFO while backup nginx configuration files."
-{
-    for host in $HOSTS ; do
-	[ ! -s /etc/nginx/conf.d/$host.conf ]	||
-	    mv /etc/nginx/conf.d/$host.conf /etc/nginx/conf.d/$host.conf.back
-    done
-}
+if ls /etc/nginx/conf.d/*.conf|grep -qv /etc/nginx/conf.d/default_server.conf|grep -qv /etc/nginx/conf.d/default.conf ; then
+    ################################################################
+    # Run command
+    MSG="line:$LINENO FATAL while Cleaning up"
+    shopt -u nullglob
+    BEFORE_EXIT
 
-########################################################################
-MSG="line:$LINENO INFO while Generating acme-client periodic script"
-{
-    cat	<<EOF	> /etc/periodic/weekly/acme-client
+    MSG="line:$LINENO FATAL while executing"
+    exec "$@"
+else
+    MSG="line:$LINENO INFO while Generating acme-client periodic script"
+    {
+	cat	<<EOF	> /etc/periodic/weekly/acme-client
 #!/bin/sh
 
 hosts="$HOSTS"
@@ -71,34 +72,23 @@ done
 [ "\$renew" = 1 ] && nginx -s reload
 EOF
 
-    unset HOSTS
+	unset HOSTS
 
-    chmod +x /etc/periodic/weekly/acme-client
+	chmod +x /etc/periodic/weekly/acme-client
 
-    MSG="line:$LINENO INFO while starting nginx"
-    nginx
+	MSG="line:$LINENO INFO while starting nginx"
+	nginx
 
-    MSG="line:$LINENO INFO while Generating initial certficate"
-    /etc/periodic/weekly/acme-client
+	MSG="line:$LINENO INFO while Generating initial certficate"
+	/etc/periodic/weekly/acme-client
 
-    MSG="line:$LINENO INFO while stopping nginx"
-    nginx -s stop
-}
+	MSG="line:$LINENO INFO while stopping nginx"
+	nginx -s stop
+    }
 
-########################################################################
-MSG="line:$LINENO INFO while restore nginx configuration files."
-{
-    for host in $HOSTS ; do
-	mv /etc/nginx/conf.d/$host.conf.back /etc/nginx/conf.d/$host.conf
-    done
-}
-
-################################################################
-# Run command
-MSG="line:$LINENO FATAL while Cleaning up"
-shopt -u nullglob
-BEFORE_EXIT
-
-MSG="line:$LINENO FATAL while executing"
-exec "$@"
-
+    ################################################################
+    # Run command
+    MSG="line:$LINENO FATAL while exit"
+    shopt -u nullglob
+    exit 0
+fi
