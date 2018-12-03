@@ -18,7 +18,7 @@ MSG() {
     echo "$pname pid:$$ stime:$stime etime:$(date +%Y%m%d%H%M%S%Z) $@"	>&3
 }
 
-tmpd=$(mktemp -d --suffix=".$pname.$stime.$$")/
+tmpd=$(mktemp -d -t "$pname.$stime.$$.XXXXXXXX")/
 if [ 0 -ne "$?" ] ; then
     MSG FATAL can not make temporally directory.
     exit 1
