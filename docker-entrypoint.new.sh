@@ -82,4 +82,4 @@ nginx -s stop
 
 ########################################################################
 MSG="line:$LINENO FATAL while exiting script."
-exit 1
+exit 0
