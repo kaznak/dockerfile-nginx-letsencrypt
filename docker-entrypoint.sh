@@ -49,18 +49,14 @@ commands:
 	for SSL certifications.
   run : run nginx server
 EOF
+    exit $1
 }
 
 ########################################################################
-if [ "$#" -eq 1 -a "$1" = "help" ] ; then
-    USAGE
-    exit 0
-fi
-
-if [ "$#" -lt 2 -o "$1" != "new" -o "$1" != "run" ] ; then
-    USAGE	>&3
-    exit 1
-fi
+[ "$#" -eq 0 ] && USAGE 1	>&3
+[ "$#" -eq 1 -a "$1" = "help" ] && USAGE 0
+[ "$1" != "new" -a "$1" -lt 2 ] && USAGE 1	>&3
+[ "$1" != "run" -a "$1" -lt 2 ] && USAGE 1	>&3
 
 command=$1
 shift
