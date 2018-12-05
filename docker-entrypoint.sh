@@ -38,57 +38,24 @@ ERROR_HANDLER()	{
 }
 
 ########################################################################
-{
-    set +u
-    if [ ! "$HOSTS" ] ; then
-	MSG "line:$LINENO INFO Environment variable $HOSTS is not set. set www.example.com for example."	>&2
-	HOSTS="www.example.com"
-    fi
-    set -u
-}
+if [ "$#" -lt 1 ] ; then
+    MSG "line:$LINENO INFO hostname is not provided from argument. use www.example.com for example."	>&2
+    hosts="www.example.com"
+else
+    hosts=$@
+fi
 
 ########################################################################
-if ls /etc/nginx/conf.d/*.conf|grep -qv /etc/nginx/conf.d/default_server.conf|grep -qv /etc/nginx/conf.d/default.conf ; then
-    ################################################################
-    # Run command
-    MSG="line:$LINENO FATAL while Cleaning up"
-    shopt -u nullglob
-    BEFORE_EXIT
+# Run command
+MSG="line:$LINENO INFO while starting nginx"
+nginx
 
-    MSG="line:$LINENO FATAL while executing"
-    exec "$@"
-else
-    MSG="line:$LINENO INFO while Generating acme-client periodic script"
-    {
-	cat	<<EOF	> /etc/periodic/weekly/acme-client
-#!/bin/sh
-
-hosts="$HOSTS"
-
-for host in \$hosts; do
-        acme-client -a https://letsencrypt.org/documents/LE-SA-v1.2-November-15-2017.pdf -Nnmv \$host && renew=1
+for host in $hosts; do
+    acme-client -a https://letsencrypt.org/documents/LE-SA-v1.2-November-15-2017.pdf -Nnmv $host && renew=1
 done
 
-[ "\$renew" = 1 ] && nginx -s reload
-EOF
+nginx -s stop
 
-	unset HOSTS
-
-	chmod +x /etc/periodic/weekly/acme-client
-
-	MSG="line:$LINENO INFO while starting nginx"
-	nginx
-
-	MSG="line:$LINENO INFO while Generating initial certficate"
-	/etc/periodic/weekly/acme-client
-
-	MSG="line:$LINENO INFO while stopping nginx"
-	nginx -s stop
-    }
-
-    ################################################################
-    # Run command
-    MSG="line:$LINENO FATAL while exit"
-    shopt -u nullglob
-    exit 0
-fi
+################################################################
+# Run command
+exit 0
