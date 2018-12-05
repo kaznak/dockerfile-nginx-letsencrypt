@@ -50,7 +50,7 @@ hosts=$@
 MSG="line:$LINENO FATAL while checking nginx site configuration."
 error=0
 for host in $hosts ; do
-    if [ -s /etc/nginx/conf.d/$host.conf ] ; then
+    if [ ! -s /etc/nginx/conf.d/$host.conf ] ; then
 	MSG line:$LINENO ERROR no nginx site configuration file: $host
 	error=1
     fi
