@@ -73,9 +73,6 @@ EOF
 MSG="line:$LINENO FATAL while change permission of acme-client periodic script"
 chmod +x /etc/periodic/weekly/acme-client
 
-MSG="line:$LINENO INFO while Generating initial certficate"
-/etc/periodic/weekly/acme-client
-
 ########################################################################
 MSG="line:$LINENO FATAL while executing nginx"
 exec nginx -g "daemon off;"
