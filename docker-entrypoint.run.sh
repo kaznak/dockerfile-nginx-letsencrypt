@@ -12,7 +12,7 @@ stime=$(date +%Y%m%d%H%M%S%Z)
 exec 3>&2
 # logd=$based/log
 # exec 3>&2 2>$logd/$pname.$stime.$$.log
-# set -vx
+set -vx
 
 MSG() {
     echo "$pname pid:$$ stime:$stime etime:$(date +%Y%m%d%H%M%S%Z) $@"	>&3
