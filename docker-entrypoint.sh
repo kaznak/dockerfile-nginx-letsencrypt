@@ -12,7 +12,7 @@ stime=$(date +%Y%m%d%H%M%S%Z)
 exec 3>&2
 # logd=$based/log
 # exec 3>&2 2>$logd/$pname.$stime.$$.log
-# set -vx
+set -vx
 
 MSG() {
     echo "$pname pid:$$ stime:$stime etime:$(date +%Y%m%d%H%M%S%Z) $@"	>&3
@@ -38,57 +38,32 @@ ERROR_HANDLER()	{
 }
 
 ########################################################################
-{
-    set +u
-    if [ ! "$HOSTS" ] ; then
-	MSG "line:$LINENO INFO Environment variable $HOSTS is not set. set www.example.com for example."	>&2
-	HOSTS="www.example.com"
-    fi
-    set -u
+USAGE() {
+    cat	<<EOF
+$pname [new|run] [hostname...]
+
+commands:
+  help : show this message
+  new : fetch initical SSL certificate
+	/etc/ssl/acme have to be persistent volume
+	for SSL certifications.
+  run : run nginx server
+EOF
 }
 
 ########################################################################
-if ls /etc/nginx/conf.d/*.conf|grep -qv /etc/nginx/conf.d/default_server.conf|grep -qv /etc/nginx/conf.d/default.conf ; then
-    ################################################################
-    # Run command
-    MSG="line:$LINENO FATAL while Cleaning up"
-    shopt -u nullglob
-    BEFORE_EXIT
-
-    MSG="line:$LINENO FATAL while executing"
-    exec "$@"
-else
-    MSG="line:$LINENO INFO while Generating acme-client periodic script"
-    {
-	cat	<<EOF	> /etc/periodic/weekly/acme-client
-#!/bin/sh
-
-hosts="$HOSTS"
-
-for host in \$hosts; do
-        acme-client -a https://letsencrypt.org/documents/LE-SA-v1.2-November-15-2017.pdf -Nnmv \$host && renew=1
-done
-
-[ "\$renew" = 1 ] && nginx -s reload
-EOF
-
-	unset HOSTS
-
-	chmod +x /etc/periodic/weekly/acme-client
-
-	MSG="line:$LINENO INFO while starting nginx"
-	nginx
-
-	MSG="line:$LINENO INFO while Generating initial certficate"
-	/etc/periodic/weekly/acme-client
-
-	MSG="line:$LINENO INFO while stopping nginx"
-	nginx -s stop
-    }
-
-    ################################################################
-    # Run command
-    MSG="line:$LINENO FATAL while exit"
-    shopt -u nullglob
+if [ "$#" -eq 1 -a "$1" = "help" ] ; then
+    USAGE
     exit 0
 fi
+
+if [ "$#" -lt 2 -o "$1" != "new" -o "$1" != "run" ] ; then
+    USAGE	>&3
+    exit 1
+fi
+
+command=$1
+shift
+
+########################################################################
+exec docker-entrypoint.$command.sh $@
