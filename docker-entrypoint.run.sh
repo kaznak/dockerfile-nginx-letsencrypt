@@ -59,7 +59,7 @@ MSG="line:$LINENO ERROR insuffisient site configuration."
 [ "$error" -eq 0 ]
 
 ########################################################################
-MSG="line:$LINENO INFO while Generating acme-client periodic script"
+MSG="line:$LINENO FATAL while Generating acme-client periodic script"
 cat	<<EOF	> /etc/periodic/weekly/acme-client
 #!/bin/sh
 
@@ -69,6 +69,9 @@ done
 
 [ "\$renew" = 1 ] && nginx -s reload
 EOF
+
+MSG="line:$LINENO FATAL while change permission of acme-client periodic script"
+chmod +x /etc/periodic/weekly/acme-client
 
 MSG="line:$LINENO INFO while Generating initial certficate"
 /etc/periodic/weekly/acme-client
