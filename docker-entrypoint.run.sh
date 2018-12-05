@@ -58,6 +58,9 @@ done
 MSG="line:$LINENO ERROR insuffisient site configuration."
 [ "$error" -eq 0 ]
 
+MSG="line:$LINENO FATAL while checking nginx site configuration."
+nginx -t
+
 ########################################################################
 MSG="line:$LINENO FATAL while Generating acme-client periodic script"
 cat	<<EOF	> /etc/periodic/weekly/acme-client
